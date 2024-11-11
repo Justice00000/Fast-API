@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import pickle
 import numpy as np
+from fastapi.middleware.cors import CORSMiddleware
 
 # Load the trained model
 with open('linear_regression_model.pkl', 'rb') as f:
@@ -9,6 +10,21 @@ with open('linear_regression_model.pkl', 'rb') as f:
 
 # Initialize FastAPI app
 app = FastAPI()
+
+# Add CORS middleware
+origins = [
+    "http://localhost",  # Local development for Flutter
+    "http://localhost:3000",  # Flutter web (port 3000 if you're using Flutter Web)
+    "https://fast-api-vv4w.onrender.com",  # Deployed app URL (adjust if needed)
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # Allow requests from the listed origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all HTTP methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allows all headers
+)
 
 # Define the request model (for the input data)
 class PredictionRequest(BaseModel):
