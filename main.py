@@ -11,19 +11,21 @@ with open('linear_regression_model.pkl', 'rb') as f:
 # Initialize FastAPI app
 app = FastAPI()
 
-# Add CORS middleware
+# CORS settings to allow your frontend (adjust accordingly)
 origins = [
-    "http://localhost",  # Local development for Flutter
-    "http://localhost:3000",  # Flutter web (port 3000 if you're using Flutter Web)
-    "https://fast-api-vv4w.onrender.com",  # Deployed app URL (adjust if needed)
+    "http://localhost:52263",  # The origin where your Flutter app is running (adjust if necessary)
+    "http://localhost",  # Local development for Flutter (adjust if necessary)
+    "http://localhost:3000",  # Flutter web running locally (adjust if needed)
+    "https://fast-api-vv4w.onrender.com",  # The URL where your backend is hosted
 ]
 
+# Adding CORS middleware to the app
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # Allow requests from the listed origins
+    allow_origins=origins,  # Allow requests from these origins
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all HTTP methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["*"],  # Allow all HTTP methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allow all headers
 )
 
 # Define the request model (for the input data)
