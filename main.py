@@ -13,7 +13,7 @@ app = FastAPI()
 
 # CORS settings to allow your frontend (adjust accordingly)
 origins = [
-    "http://localhost:52263",  # The origin where your Flutter app is running (adjust if necessary)
+    "http://127.0.0.1:8000",  # The origin where your Flutter app is running (adjust if necessary)
     "http://localhost",  # Local development for Flutter (adjust if necessary)
     "http://localhost:3000",  # Flutter web running locally (adjust if needed)
     "https://fast-api-vv4w.onrender.com",  # The URL where your backend is hosted
