@@ -1,52 +1,39 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
-import pickle
-import numpy as np
+from pydantic import BaseModel, Field
 from fastapi.middleware.cors import CORSMiddleware
+import joblib
 
-# Load the trained model
-with open('linear_regression_model.pkl', 'rb') as f:
-    model = pickle.load(f)
+# Load model
+model = joblib.load("best_model.pkl")
 
-# Initialize FastAPI app
 app = FastAPI()
 
-# Add CORS middleware
-origins = [
-    "http://localhost",  # Local development for Flutter
-    "http://localhost:3000",  # Flutter web (port 3000 if you're using Flutter Web)
-    "https://fast-api-vv4w.onrender.com",  # Deployed app URL (adjust if needed)
-]
-
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # Allow requests from the listed origins
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all HTTP methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-# Define the request model (for the input data)
-class PredictionRequest(BaseModel):
-    area: float
-    bedrooms: float
-    bathrooms: float
-    stories: float
-    parking: float
+# Data model for input validation
+class HealthData(BaseModel):
+    Pregnancies: int = Field(..., ge=0)
+    Glucose: float = Field(..., ge=0)
+    BloodPressure: float = Field(..., ge=0)
+    SkinThickness: float = Field(..., ge=0)
+    Insulin: float = Field(..., ge=0)
+    BMI: float = Field(..., gt=0)
+    DiabetesPedigreeFunction: float = Field(..., gt=0)
+    Age: int = Field(..., ge=0)
 
-# Define the prediction endpoint
 @app.post("/predict")
-def predict(data: PredictionRequest):
-    # Extract features from the request data
-    features = np.array([[data.area, data.bedrooms, data.bathrooms, data.stories, data.parking]])
-    
-    # Make a prediction using the model
-    prediction = model.predict(features)[0]
-    
-    # Return the prediction as a JSON response
-    return {"prediction": prediction}
-
-# Optional: Add a root endpoint for testing
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to the Linear Regression Prediction API"}
+async def predict(data: HealthData):
+    features = [[
+        data.Pregnancies, data.Glucose, data.BloodPressure,
+        data.SkinThickness, data.Insulin, data.BMI,
+        data.DiabetesPedigreeFunction, data.Age
+    ]]
+    prediction = model.predict(features)
+    return {"prediction": "Diabetic" if prediction[0] == 1 else "Non-diabetic"}
