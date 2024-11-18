@@ -1,11 +1,14 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 import joblib
 import numpy as np
 
-# Load your model
-model = joblib.load('diabetes_model.pkl')
+# Load model
+try:
+    model = joblib.load('diabetes_model.pkl')
+except FileNotFoundError:
+    raise RuntimeError("Model file 'diabetes_model.pkl' not found. Ensure it's in the correct location.")
 
 # Create a FastAPI app
 app = FastAPI()
@@ -30,6 +33,12 @@ class PredictionRequest(BaseModel):
     dpf: float
     age: int
 
+    @validator('glucose', 'insulin', 'bmi', 'blood_pressure', 'skin_thickness', 'dpf', 'age')
+    def check_positive(cls, value):
+        if value < 0:
+            raise ValueError('Value must be non-negative')
+        return value
+
 @app.get("/")
 def home():
     return {"message": "Welcome to the Health Outcome Prediction API!"}
@@ -40,8 +49,12 @@ def predict(request: PredictionRequest):
     data = np.array([[request.pregnancies, request.glucose, request.blood_pressure, 
                       request.skin_thickness, request.insulin, request.bmi, 
                       request.dpf, request.age]])
-    # Make a prediction
-    prediction = model.predict(data)
-    # Map prediction result
-    result = "Diabetic" if prediction[0] == 1 else "Non-Diabetic"
-    return {"prediction": result}
+
+    try:
+        # Make a prediction
+        prediction = model.predict(data)
+        # Map prediction result
+        result = "Diabetic" if prediction[0] == 1 else "Non-Diabetic"
+        return {"prediction": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
