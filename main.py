@@ -30,10 +30,10 @@ class PredictionRequest(BaseModel):
     skin_thickness: float
     insulin: float
     bmi: float
-    dpf: float
+    diabetes_pedigree_function: float
     age: int
 
-    @validator('glucose', 'insulin', 'bmi', 'blood_pressure', 'skin_thickness', 'dpf', 'age')
+    @validator('glucose', 'insulin', 'bmi', 'blood_pressure', 'skin_thickness', 'diabetes_pedigree_function', 'age')
     def check_positive(cls, value):
         if value < 0:
             raise ValueError('Value must be non-negative')
