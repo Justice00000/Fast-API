@@ -48,7 +48,7 @@ def predict(request: PredictionRequest):
     # Prepare the input data
     data = np.array([[request.pregnancies, request.glucose, request.blood_pressure, 
                       request.skin_thickness, request.insulin, request.bmi, 
-                      request.dpf, request.age]])
+                      request.diabetes_pedigree_function, request.age]])
 
     try:
         # Make a prediction
